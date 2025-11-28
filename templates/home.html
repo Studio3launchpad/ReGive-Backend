@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReGive API – Welcome</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background: #f4f5f7;
+        }
+
+        header {
+            background: #0B8A45; /* green */
+            padding: 25px;
+            text-align: center;
+            color: white;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 40px;
+            letter-spacing: 1px;
+        }
+
+        .hero {
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 30px;
+            margin-bottom: 10px;
+            color: #0B8A45;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: #555;
+        }
+
+        .btn-container {
+            margin-top: 40px;
+        }
+
+        a.button {
+            background: #E7C757; /* gold */
+            padding: 14px 28px;
+            color: black;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+
+        a.button:hover {
+            background: #d4b348;
+        }
+
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            padding: 15px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ReGive API</h1>
+</header>
+
+<section class="hero">
+    <h2>Welcome to the ReGive Backend</h2>
+    <p>Your eCommerce marketplace API for buyers, sellers & secure interactions.</p>
+
+    <div class="btn-container">
+        <a href="{% url 'swagger-ui' %}" class="button">📘 View API Documentation</a>
+    </div>
+</section>
+
+<footer>
+    © {{ year }} ReGive • Powered by Django + DRF
+</footer>
+
+</body>
+</html>
+
