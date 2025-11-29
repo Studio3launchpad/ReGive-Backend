@@ -1,37 +1,27 @@
-import re
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
-from django.db.models import Q
-from django.core.exceptions import MultipleObjectsReturned
 
 
-class EmailOrPhoneBackend(ModelBackend):
+class EmailBackend(ModelBackend):
     """
-    Custom authentication backend that allows users to log in using either
-    their email address or phone number.
+    Authenticate using email only.
     """
 
     def authenticate(self, request, username=None, password=None, **kwargs):
         UserModel = get_user_model()
 
-       
-        identifier = username or kwargs.get("login") or kwargs.get(UserModel.USERNAME_FIELD)
-        if not identifier or not password:
-            return None
+        # Support both username= and email=
+        email = username or kwargs.get("email")
 
-        
-        normalized_phone = re.sub(r"\D", "", identifier)
+        if email is None or password is None:
+            return None
 
         try:
-            user = UserModel.objects.get(
-                Q(email__iexact=identifier) | Q(phone_number=normalized_phone)
-            )
+            user = UserModel.objects.get(email__iexact=email)
         except UserModel.DoesNotExist:
-            return None
-        except MultipleObjectsReturned:
             return None
 
         if user.check_password(password) and self.user_can_authenticate(user):
             return user
 
-
+        return None

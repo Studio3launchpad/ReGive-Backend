@@ -13,7 +13,6 @@ class CustomUserAdmin(UserAdmin):
         "id",
         "email",
         "full_name",
-        "phone_number",
         "role",
         "is_verified",
         "is_active",
@@ -22,12 +21,12 @@ class CustomUserAdmin(UserAdmin):
     )
 
     list_filter = ("role", "is_verified", "is_active", "is_deleted")
-    search_fields = ("email", "full_name", "phone_number")
+    search_fields = ("email", "full_name")
     ordering = ("-date_joined",)
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        ("Personal Info", {"fields": ("full_name", "phone_number")}),
+        ("Personal Info", {"fields": ("full_name",)}),
         ("Role & Status", {
             "fields": (
                 "role",
@@ -48,7 +47,6 @@ class CustomUserAdmin(UserAdmin):
             "fields": (
                 "email",
                 "full_name",
-                "phone_number",
                 "role",
                 "password1",
                 "password2",
@@ -57,14 +55,14 @@ class CustomUserAdmin(UserAdmin):
     )
 
 
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "phone_number", "birth_date")
+    search_fields = ("user__email", "user__full_name", "phone_number")
+
+
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
     list_display = ("user", "street", "city", "state", "country")
     search_fields = ("user__email", "street", "city")
     list_filter = ("city", "state", "country")
-
-
-@admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "birth_date", "website")
-    search_fields = ("user__email", "user__full_name")

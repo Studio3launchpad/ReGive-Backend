@@ -14,62 +14,65 @@ from wishlist.models import Wishlist
 from cart.models import Cart, CartItem
 
 
-class CustomRegisterSerializer(RegisterSerializer):
+from dj_rest_auth.registration.serializers import RegisterSerializer
+from rest_framework import serializers
+from users.models import CustomUser
+
+
+
+class CustomRegisterSerializer(serializers.Serializer):
     username = None
-    email = serializers.EmailField(required=True)
+
     full_name = serializers.CharField(required=True)
-    phone_number = serializers.CharField(required=True)
-    role = serializers.ChoiceField(choices=CustomUser.Roles.choices)
-    password1 = serializers.CharField(write_only=True)
-    password2 = serializers.CharField(write_only=True)
 
-    class Meta:
-        model = CustomUser
-        fields = ["email", "full_name", "phone_number", "role", "password1", "password2"]
+    #ROLE CHOICES — remove ADMIN completely
+    role = serializers.ChoiceField(
+        choices=[
+            (CustomUser.Roles.BUYER, "Buyer"),
+            (CustomUser.Roles.SELLER, "Seller"),
+        ],
+        required=True
+    )
 
-    def validate_phone_number(self, value):
-        normalized = re.sub(r"\D", "", value)
-        if CustomUser.objects.filter(phone_number=normalized).exists():
-            raise serializers.ValidationError("Phone number already exists.")
-        return normalized
+    email = serializers.EmailField(required=True)
 
-    def get_cleaned_data(self):
-        data = super().get_cleaned_data()
-        data['full_name'] = self.validated_data.get('full_name', '')
-        data['phone_number'] = self.validated_data.get('phone_number', '')
-        data['role'] = self.validated_data.get('role', CustomUser.Roles.BUYER)
-        return data
+    password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({"password": "Passwords do not match"})
+        return attrs
 
     def save(self, request):
-        data = self.get_cleaned_data()
+        data = self.validated_data
         return CustomUser.objects.create_user(
             email=data["email"],
-            password=data["password1"],
             full_name=data["full_name"],
-            phone_number=data["phone_number"],
-            role=data["role"],
+            role=data["role"],    # seller or buyer only
+            password=data["password"],
         )
 
 
+
+
 class CustomLoginSerializer(LoginSerializer):
-    username = None
-    phone = serializers.CharField()
+    username = None  # remove username field
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        identifier = attrs["phone"]
-        password = attrs["password"]
+        email = attrs.get("email")
+        password = attrs.get("password")
 
-        user = CustomUser.objects.filter(
-            Q(email__iexact=identifier) | Q(phone_number=identifier)
-        ).first()
+        if not email or not password:
+            raise serializers.ValidationError("Email and password are required.")
 
-        if user:
-            user = authenticate(
-                self.context["request"],
-                username=user.email,
-                password=password,
-            )
+        user = authenticate(
+            request=self.context.get("request"),
+            username=email,   # authenticate using email
+            password=password
+        )
 
         if not user:
             raise serializers.ValidationError("Invalid login credentials.")
@@ -78,10 +81,11 @@ class CustomLoginSerializer(LoginSerializer):
         return attrs
 
 
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ["bio", "avatar", "website", "birth_date"]
+        fields = ["phone_number", "bio", "avatar", "birth_date"]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -90,11 +94,15 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = [
-            "id", "email", "full_name",
-            "phone_number", "role",
-            "is_verified", "date_joined",
+            "id",
+            "email",
+            "full_name",
+            "role",
+            "is_verified",
+            "date_joined",
             "profile",
         ]
+
 
 
 
@@ -216,8 +224,8 @@ class OrderSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ["id", "order", "amount", "provider", "status", "reference", "created_at"]
-        read_only_fields = ["status", "created_at"]
+        fields = "__all__"
+        read_only_fields = ["reference", "user"]
 
 
 

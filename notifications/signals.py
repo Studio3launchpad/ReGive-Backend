@@ -4,10 +4,10 @@ from django.dispatch import receiver
 from notifications.models import Notification
 
 
-# ✅ Placeholder for push notifications (FCM, OneSignal, etc.)
+#Placeholder for push notifications (FCM, OneSignal, etc.)
 @receiver(post_save, sender=Notification)
 def send_push_notification(sender, instance, created, **kwargs):
     if created:
-        # Integrate FCM / OneSignal here
+        #integrate FCM / OneSignal here
         pass
 

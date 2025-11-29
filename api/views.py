@@ -64,9 +64,7 @@ class ItemStatsSerializer(serializers.Serializer):
     total_reviews = serializers.IntegerField()
 
 
-# -------------------------
-# Auth views
-# -------------------------
+
 @extend_schema(tags=["Auth"], summary="Custom login (dj-rest-auth override)")
 class CustomLoginView(LoginView):
     serializer_class = CustomLoginSerializer
@@ -77,11 +75,11 @@ class RegisterUserView(GenericAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = CustomRegisterSerializer
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save(request)
-        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        user = serializer.save(request=request)  
+        return Response(UserSerializer(user).data, status=201)
 
 
 @extend_schema(tags=["Auth"], responses=UserSerializer)
@@ -93,9 +91,7 @@ class UserProfileView(GenericAPIView):
         return Response(self.get_serializer(request.user).data)
 
 
-# -------------------------
-# Dashboards (documented)
-# -------------------------
+
 @extend_schema_view(get=extend_schema(responses=AdminDashboardSerializer))
 @extend_schema(tags=["Dashboard"])
 class AdminDashboardView(GenericAPIView):
@@ -167,9 +163,6 @@ class MarketplaceDashboardView(GenericAPIView):
         return Response(serializer.data)
 
 
-# -------------------------
-# Address
-# -------------------------
 @extend_schema(tags=["Address"])
 class AddressViewSet(viewsets.ModelViewSet):
     serializer_class = AddressSerializer
@@ -183,9 +176,7 @@ class AddressViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-# -------------------------
-# Category
-# -------------------------
+
 @extend_schema(tags=["Categories"])
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
@@ -203,9 +194,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return Response(ItemSerializer(items, many=True).data)
 
 
-# -------------------------
-# Public items
-# -------------------------
 @extend_schema(tags=["Marketplace"])
 class PublicItemViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ItemSerializer
@@ -216,9 +204,6 @@ class PublicItemViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = DefaultPagination
 
 
-# -------------------------
-# Item reviews
-# -------------------------
 @extend_schema(tags=["Reviews"])
 class ItemReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ItemReviewSerializer
@@ -232,9 +217,7 @@ class ItemReviewViewSet(viewsets.ModelViewSet):
         serializer.save(reviewer=self.request.user)
 
 
-# -------------------------
-# Wishlist
-# -------------------------
+
 @extend_schema(tags=["Wishlist"])
 class WishlistViewSet(viewsets.ModelViewSet):
     serializer_class = WishlistSerializer
@@ -267,9 +250,6 @@ class WishlistViewSet(viewsets.ModelViewSet):
         return Response({"message": "Item removed"})
 
 
-# -------------------------
-# Cart (with checkout)
-# -------------------------
 @extend_schema(tags=["Cart"])
 class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
@@ -356,9 +336,7 @@ class CartViewSet(viewsets.ModelViewSet):
         return Response({"message": "Cart cleared"})
 
 
-# -------------------------
-# Orders & Payments
-# -------------------------
+
 @extend_schema(tags=["Orders"])
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
@@ -387,18 +365,29 @@ class PaymentViewSet(viewsets.ModelViewSet):
     pagination_class = DefaultPagination
 
     def get_queryset(self):
-        return Payment.objects.filter(user=self.request.user)
+        # FIX: add ordering to remove pagination warnings
+        return Payment.objects.filter(user=self.request.user).order_by("-created_at")
 
-    @extend_schema(request=PaymentSerializer, responses=PaymentSerializer)
+    @extend_schema(
+        summary="Record a payment after successful Paystack verification",
+        request=PaymentSerializer,
+        responses=PaymentSerializer,
+        description=(
+            "This endpoint saves a verified payment, marks the related order as PAID, "
+            "and sends notifications to sellers and the buyer."
+        )
+    )
     def perform_create(self, serializer):
-        # Save with user for audit
+
+        # Save payment with user
         payment = serializer.save(user=self.request.user)
 
+        # Update order status
         order = payment.order
         order.status = "PAID"
-        order.save()
+        order.save(update_fields=["status"])
 
-        # send notification for sellers
+        # Notify each seller in the order
         for oi in order.items.all():
             Notification.objects.create(
                 user=oi.item.seller,
@@ -406,15 +395,17 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 message=f"{order.buyer.full_name} ordered {oi.item.name} (qty {oi.quantity})."
             )
 
-        # notify buyer
-        Notification.objects.create(user=order.buyer, title="Payment Received", message=f"Payment for order #{order.id} received.")
+        # Notify buyer
+        Notification.objects.create(
+            user=order.buyer,
+            title="Payment Received",
+            message=f"Payment for order #{order.id} received."
+        )
 
         return payment
 
 
-# -------------------------
-# Notifications
-# -------------------------
+
 @extend_schema(tags=["Notifications"])
 class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = NotificationSerializer
@@ -433,9 +424,7 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(NotificationSerializer(n).data)
 
 
-# -------------------------
-# Item stats
-# -------------------------
+
 @extend_schema(tags=["Items"], responses=ItemStatsSerializer)
 class ItemStatsView(GenericAPIView):
     permission_classes = [permissions.AllowAny]
@@ -452,9 +441,6 @@ class ItemStatsView(GenericAPIView):
         return Response(self.get_serializer(data).data)
 
 
-# -------------------------
-# CRUD for Items (sellers create/update/delete)
-# -------------------------
 @extend_schema(tags=["Items"])
 class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
