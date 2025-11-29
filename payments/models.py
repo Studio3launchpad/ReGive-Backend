@@ -1,6 +1,13 @@
 from django.db import models
 from django.conf import settings
 from orders.models import Order
+import uuid
+
+def generate_payment_reference():
+    
+    return f"REF-{uuid.uuid4().hex[:8].upper()}"
+    
+
 
 class Payment(models.Model):
     STATUS_CHOICES = [
@@ -18,6 +25,6 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.email} - {self.order.id} - {self.status}"
+        return self.reference
 
 

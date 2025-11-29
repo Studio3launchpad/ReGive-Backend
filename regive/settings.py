@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    
 
     #Third party apps
     'rest_framework',
@@ -61,8 +63,11 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_filters',
 
+     # Google provider
+    #"allauth.socialaccount.providers.google",
+
     #local apps
-    'users',
+    'users.apps.UsersConfig',
     'items',
     'api',
     'orders',
@@ -158,12 +163,14 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+SITE_ID = 1
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "users.CustomUser"
 
 AUTHENTICATION_BACKENDS = [
-    'users.backends.EmailOrPhoneBackend',
+    'users.backends.EmailBackend',
     'django.contrib.auth.backends.ModelBackend',
  ]
 
@@ -197,27 +204,14 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
     "COMPONENT_SPLIT_PATCH": True,
 
-    # Fix operationId collisions
-    #"OPERATION_ID_FORMAT": "{method}_{path}",
-
-    # Optional nice extras
-    #"CONTACT": {"name": "ReGive Team", "email": "support@regive.com"},
-    #"LICENSE": {"name": "MIT"},
+    
 }
 
-# dj-rest-auth (Login & Register)
 REST_AUTH = {
     "USE_JWT": True,
     "JWT_AUTH_COOKIE": "my-app-auth",
     "JWT_AUTH_REFRESH_COOKIE": "my-refresh-token",
-}
-
-# Bind your custom serializers
-REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "api.serializers.CustomRegisterSerializer",
-}
-
-REST_AUTH_SERIALIZERS = {
     "LOGIN_SERIALIZER": "api.serializers.CustomLoginSerializer",
 }
 
@@ -228,9 +222,17 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-# Django-allauth settings
-ACCOUNT_LOGIN_METHODS = ["email"]
-ACCOUNT_SIGNUP_FIELDS = ["email", "password1", "password2"]
+ACCOUNT_LOGIN_METHODS = {"email"}     # replaces deprecated ACCOUNT_AUTHENTICATION_METHOD
+ACCOUNT_EMAIL_REQUIRED = False        # REMOVE – now controlled by SIGNUP_FIELDS
+ACCOUNT_USERNAME_REQUIRED = False     # REMOVE – deprecated
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+
+ACCOUNT_SIGNUP_FIELDS = {
+    "email": {"required": True},
+    "password1": {"required": True},
+    "password2": {"required": True},
+    "full_name": {"required": True},
+    "role": {"required": True},
+}
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

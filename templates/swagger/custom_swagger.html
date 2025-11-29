@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>ReGive API Docs</title>
+
+    <link rel="stylesheet"
+          type="text/css"
+          href="https://unpkg.com/swagger-ui-dist/swagger-ui.css">
+
+    <style>
+        /* Top banner */
+        .topbar {
+            background-color: #0B8A45 !important; /* green */
+            padding: 10px;
+        }
+
+        .topbar span {
+            color: white !important;
+            font-size: 22px !important;
+            font-weight: bold;
+        }
+
+        .swagger-ui .info h2,
+        .swagger-ui .info p,
+        .swagger-ui .opblock-summary-method {
+            color: #0B8A45 !important; /* Green accent */
+        }
+
+        .swagger-ui .opblock.opblock-post {
+            border-color: #E7C757 !important; /* Gold border */
+        }
+
+        .swagger-ui .opblock-summary {
+            border-left: 5px solid #0B8A45 !important; /* Green left border */
+        }
+
+        body {
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+
+<body>
+<div id="swagger-ui"></div>
+
+<script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+<script>
+    window.onload = function() {
+        SwaggerUIBundle({
+            url: "/api/schema/",  // <-- your schema endpoint
+            dom_id: '#swagger-ui',
+            presets: [
+                SwaggerUIBundle.presets.apis,
+            ],
+            layout: "BaseLayout"
+        });
+    };
+</script>
+
+</body>
+</html>

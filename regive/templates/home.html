@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>ReGive — Marketplace API</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        background: #f8f9fa;
+    }
+
+    header {
+        background: #1A9C57;  /* Green */
+        padding: 25px 40px;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    header h1 {
+        font-size: 28px;
+        margin: 0;
+    }
+
+    .btn {
+        padding: 12px 22px;
+        background: #F4C430; /* Gold */
+        color: black;
+        font-weight: 600;
+        border-radius: 8px;
+        text-decoration: none;
+    }
+
+    .hero {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+    }
+
+    .hero h2 {
+        font-size: 38px;
+        color: #1A9C57;
+        margin-bottom: 12px;
+    }
+
+    .hero p {
+        font-size: 18px;
+        color: #555;
+    }
+
+    .cards {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        flex-wrap: wrap;
+        margin-top: 40px;
+        padding: 40px;
+    }
+
+    .card {
+        background: white;
+        padding: 25px;
+        width: 280px;
+        text-align: center;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-top: 5px solid #1A9C57;
+    }
+
+    .card h3 {
+        font-size: 22px;
+        margin-bottom: 10px;
+        color: #1A9C57;
+    }
+
+    .card p {
+        color: #444;
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+
+    footer {
+        margin-top: 60px;
+        background: #1A9C57;
+        padding: 15px;
+        text-align: center;
+        color: white;
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>ReGive Marketplace API</h1>
+    <a href="/api/docs/" class="btn">View API Docs</a>
+</header>
+
+<section class="hero">
+    <h2>Welcome to ReGive API</h2>
+    <p>Your gateway to a smart marketplace — buyers, sellers, products, orders & payments.</p>
+</section>
+
+<div class="cards">
+    <div class="card">
+        <h3>Authentication</h3>
+        <p>Secure login, registration, JWT tokens.</p>
+        <a class="btn" href="/api/auth/login/">Login</a>
+    </div>
+
+    <div class="card">
+        <h3>Shop</h3>
+        <p>Browse items, categories, reviews, and wishlist.</p>
+        <a class="btn" href="/api/items/">Items</a>
+    </div>
+
+    <div class="card">
+        <h3>Orders & Payments</h3>
+        <p>Checkout, pay securely, and track orders.</p>
+        <a class="btn" href="/api/orders/">Orders</a>
+    </div>
+</div>
+
+<footer>
+    © {{ year }} ReGive Marketplace — All Rights Reserved
+</footer>
+
+</body>
+</html>
