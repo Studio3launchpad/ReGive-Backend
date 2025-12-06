@@ -14,12 +14,12 @@ import os
 #from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 # Media files (user uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -30,13 +30,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY', "36u6_u$)(9x$q!xhnqkcidpbp@k3an@3$l$-yl(g4um=ufmm^)")
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["regive.pythonanywhere.com",]
 
 
 # Application definition
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    
+
 
     #Third party apps
     'rest_framework',
@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework_simplejwt',
     'django_filters',
-
+    'corsheaders',
      # Google provider
     #"allauth.socialaccount.providers.google",
 
@@ -88,6 +88,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Add the account middleware:
     "allauth.account.middleware.AccountMiddleware",
+    #Cors Headers
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
 ]
 
 ROOT_URLCONF = 'regive.urls'
@@ -95,7 +98,7 @@ ROOT_URLCONF = 'regive.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR,  "templates"],
+        'DIRS': [BASE_DIR /  "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -116,10 +119,10 @@ WSGI_APPLICATION = 'regive.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.mysql"),
-        "NAME": os.getenv("DB_NAME"),
+        "NAME": os.getenv("DB_NAME","Regive$default"),
         "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
+        "PASSWORD": os.getenv("DB_PASSWORD","Adewumi2025%"),
+        "HOST": os.getenv("DB_HOST","Regive.mysql.pythonanywhere-services.com"),
         "PORT": os.getenv("DB_PORT"),
     }
 }
@@ -204,7 +207,7 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
     "COMPONENT_SPLIT_PATCH": True,
 
-    
+
 }
 
 REST_AUTH = {
@@ -236,3 +239,23 @@ ACCOUNT_SIGNUP_FIELDS = {
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+#Allow Cors Header
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:5173",
+    "http://localhost:5176/",
+]
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'DELETE',
+    'OPTIONS',
+]
+
+CORS_ALLOW_HEADERS = [
+    'Content-Type',
+    'Authorization',
+]
